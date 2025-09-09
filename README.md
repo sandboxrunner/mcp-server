@@ -1,5 +1,7 @@
 # SandboxRunner
 
+![SandboxRunner Banner](assets/sandbox2.png)
+
 Multi-language MCP (Model Context Protocol) server providing isolated sandbox environments for secure code execution. Uses runc/OCI containers for process isolation and supports Python, JavaScript/TypeScript, Go, Rust, Java, C++, C#, and Shell.
 
 ## Features
