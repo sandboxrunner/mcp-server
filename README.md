@@ -44,7 +44,7 @@ Server configuration is managed through `config/mcp-sandboxd.yaml`. See [Getting
 
 ## Requirements
 
-- Go 1.21+
+- Go 1.24+
 - runc container runtime
 - Linux with container support
 
