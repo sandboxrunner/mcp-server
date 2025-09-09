@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SandboxRunner API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@4.15.5/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@4.15.5/favicon-16x16.png" sizes="16x16" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin:0;
+            background: #fafafa;
+        }
+
+        .swagger-ui .topbar {
+            background-color: #2c5aa0;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #ffffff;
+        }
+
+        .swagger-ui .info .title {
+            color: #2c5aa0;
+        }
+
+        .custom-header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a6f 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .custom-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .custom-header p {
+            margin: 0.5rem 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .quick-links {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 0 2rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .quick-links h3 {
+            margin-top: 0;
+            color: #2c5aa0;
+        }
+
+        .quick-links ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .quick-links li {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .quick-links a {
+            text-decoration: none;
+            color: #2c5aa0;
+            font-weight: 500;
+        }
+
+        .quick-links a:hover {
+            text-decoration: underline;
+        }
+
+        .sdk-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 0 2rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .sdk-section h3 {
+            margin-top: 0;
+            color: #2c5aa0;
+        }
+
+        .sdk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .sdk-card {
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .sdk-card:hover {
+            border-color: #2c5aa0;
+        }
+
+        .sdk-card h4 {
+            margin: 0 0 0.5rem;
+            color: #2c5aa0;
+        }
+
+        .sdk-card button {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .sdk-card button:hover {
+            background: #1e3a6f;
+        }
+
+        #swagger-ui {
+            margin: 0 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .quick-links ul {
+                flex-direction: column;
+            }
+            
+            .custom-header h1 {
+                font-size: 2rem;
+            }
+            
+            .quick-links, .sdk-section, #swagger-ui {
+                margin: 0 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="custom-header">
+        <h1>SandboxRunner API</h1>
+        <p>Secure Multi-Language Code Execution Platform</p>
+        <p>Version 5.2.0 | MCP Protocol 2024-11-05</p>
+    </div>
+
+    <div class="quick-links">
+        <h3>Quick Links</h3>
+        <ul>
+            <li><a href="#operation/createSandbox">Create Sandbox</a></li>
+            <li><a href="#operation/runPython">Python Execution</a></li>
+            <li><a href="#operation/runJavaScript">JavaScript Execution</a></li>
+            <li><a href="#operation/runGo">Go Execution</a></li>
+            <li><a href="#operation/runRust">Rust Execution</a></li>
+            <li><a href="#operation/uploadFile">File Upload</a></li>
+            <li><a href="#operation/listSandboxes">List Sandboxes</a></li>
+            <li><a href="./README.md">Full Documentation</a></li>
+        </ul>
+    </div>
+
+    <div class="sdk-section">
+        <h3>SDK & Code Generation</h3>
+        <div class="sdk-grid">
+            <div class="sdk-card">
+                <h4>Python SDK</h4>
+                <p>Generate Python client library</p>
+                <button onclick="generateSDK('python')">Generate Python SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>JavaScript SDK</h4>
+                <p>Generate JavaScript/TypeScript client</p>
+                <button onclick="generateSDK('javascript')">Generate JS SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>Go SDK</h4>
+                <p>Generate Go client library</p>
+                <button onclick="generateSDK('go')">Generate Go SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>Rust SDK</h4>
+                <p>Generate Rust client library</p>
+                <button onclick="generateSDK('rust')">Generate Rust SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>Java SDK</h4>
+                <p>Generate Java client library</p>
+                <button onclick="generateSDK('java')">Generate Java SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>C# SDK</h4>
+                <p>Generate C# client library</p>
+                <button onclick="generateSDK('csharp')">Generate C# SDK</button>
+            </div>
+            <div class="sdk-card">
+                <h4>OpenAPI Spec</h4>
+                <p>Download OpenAPI specification</p>
+                <button onclick="downloadSpec()">Download YAML</button>
+            </div>
+            <div class="sdk-card">
+                <h4>Postman Collection</h4>
+                <p>Import into Postman</p>
+                <button onclick="generatePostman()">Generate Collection</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Begin Swagger UI call region
+            const ui = SwaggerUIBundle({
+                url: './openapi.yaml',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                tryItOutEnabled: true,
+                displayRequestDuration: true,
+                docExpansion: "list",
+                filter: true,
+                showExtensions: true,
+                showCommonExtensions: true,
+                requestInterceptor: function(req) {
+                    // Add custom headers or authentication here
+                    if (localStorage.getItem('sandboxrunner-api-key')) {
+                        req.headers['X-API-Key'] = localStorage.getItem('sandboxrunner-api-key');
+                    }
+                    return req;
+                },
+                responseInterceptor: function(res) {
+                    // Handle responses here
+                    console.log('API Response:', res);
+                    return res;
+                }
+            });
+            // End Swagger UI call region
+
+            window.ui = ui;
+
+            // Add API key management
+            addAPIKeyManager();
+        };
+
+        function addAPIKeyManager() {
+            // Create API key input section
+            const headerDiv = document.querySelector('.custom-header');
+            const apiKeyDiv = document.createElement('div');
+            apiKeyDiv.innerHTML = `
+                <div style="margin-top: 1rem;">
+                    <label for="api-key" style="display: inline-block; margin-right: 0.5rem;">API Key:</label>
+                    <input type="password" id="api-key" placeholder="Enter API key for authentication" 
+                           style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; margin-right: 0.5rem;">
+                    <button onclick="setAPIKey()" style="padding: 0.5rem 1rem; background: white; color: #2c5aa0; border: 1px solid white; border-radius: 4px; cursor: pointer;">Set Key</button>
+                    <button onclick="clearAPIKey()" style="padding: 0.5rem 1rem; background: transparent; color: white; border: 1px solid white; border-radius: 4px; cursor: pointer; margin-left: 0.5rem;">Clear</button>
+                </div>
+            `;
+            headerDiv.appendChild(apiKeyDiv);
+
+            // Load existing API key
+            const existingKey = localStorage.getItem('sandboxrunner-api-key');
+            if (existingKey) {
+                document.getElementById('api-key').value = existingKey;
+            }
+        }
+
+        function setAPIKey() {
+            const apiKey = document.getElementById('api-key').value;
+            if (apiKey) {
+                localStorage.setItem('sandboxrunner-api-key', apiKey);
+                alert('API key set successfully!');
+            }
+        }
+
+        function clearAPIKey() {
+            localStorage.removeItem('sandboxrunner-api-key');
+            document.getElementById('api-key').value = '';
+            alert('API key cleared!');
+        }
+
+        function generateSDK(language) {
+            // In a real implementation, this would call your SDK generation service
+            const specUrl = window.location.origin + window.location.pathname.replace('swagger-ui.html', 'openapi.yaml');
+            
+            // For now, show instructions for using openapi-generator
+            const instructions = {
+                python: {
+                    name: 'Python SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g python -o ./sandboxrunner-python-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                },
+                javascript: {
+                    name: 'JavaScript SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g javascript -o ./sandboxrunner-js-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                },
+                go: {
+                    name: 'Go SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g go -o ./sandboxrunner-go-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                },
+                rust: {
+                    name: 'Rust SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g rust -o ./sandboxrunner-rust-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                },
+                java: {
+                    name: 'Java SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g java -o ./sandboxrunner-java-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                },
+                csharp: {
+                    name: 'C# SDK',
+                    command: `openapi-generator-cli generate -i ${specUrl} -g csharp -o ./sandboxrunner-csharp-sdk`,
+                    install: 'npm install -g @openapitools/openapi-generator-cli'
+                }
+            };
+
+            const config = instructions[language];
+            if (config) {
+                const message = `To generate the ${config.name}:
+
+1. Install OpenAPI Generator CLI:
+   ${config.install}
+
+2. Generate SDK:
+   ${config.command}
+
+3. Follow the generated README for usage instructions.
+
+This will create a complete SDK with models, API clients, and documentation.`;
+
+                alert(message);
+                
+                // Copy command to clipboard if supported
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(config.command);
+                }
+            }
+        }
+
+        function downloadSpec() {
+            const specUrl = './openapi.yaml';
+            const link = document.createElement('a');
+            link.href = specUrl;
+            link.download = 'sandboxrunner-openapi.yaml';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function generatePostman() {
+            // Convert OpenAPI spec to Postman collection
+            const specUrl = window.location.origin + window.location.pathname.replace('swagger-ui.html', 'openapi.yaml');
+            
+            const instructions = `To generate a Postman collection:
+
+1. Visit: https://www.postman.com/api-platform/openapi-to-postman/
+
+2. Enter OpenAPI URL: ${specUrl}
+
+3. Or use Postman's import feature directly with the URL.
+
+4. The collection will include all API endpoints with examples and documentation.`;
+
+            alert(instructions);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+K to focus search
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.swagger-ui .filter input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Add dark mode toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('sandboxrunner-theme', 
+                document.body.classList.contains('dark-theme') ? 'dark' : 'light'
+            );
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('sandboxrunner-theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+
+    <style>
+        /* Dark theme styles */
+        .dark-theme {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .dark-theme .custom-header {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+        }
+
+        .dark-theme .quick-links,
+        .dark-theme .sdk-section {
+            background: #2d2d2d;
+            border-color: #404040;
+        }
+
+        .dark-theme .sdk-card {
+            background: #3d3d3d;
+            border-color: #505050;
+        }
+
+        .dark-theme .swagger-ui {
+            filter: invert(1) hue-rotate(180deg);
+        }
+
+        .dark-theme .swagger-ui .swagger-ui .topbar {
+            filter: invert(1) hue-rotate(180deg);
+        }
+    </style>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem; background: #f8f9fa; margin-top: 2rem; border-top: 1px solid #e1e5e9;">
+        <p>
+            <strong>SandboxRunner v5.2.0</strong> | 
+            <a href="https://github.com/sandboxrunner/mcp-server">GitHub</a> | 
+            <a href="./README.md">Documentation</a> | 
+            <a href="mailto:support@sandboxrunner.dev">Support</a>
+        </p>
+        <p>
+            <small>© 2024 SandboxRunner. Licensed under MIT License.</small>
+        </p>
+    </footer>
+</body>
+</html>

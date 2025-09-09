@@ -1,0 +1,1256 @@
+openapi: 3.0.3
+info:
+  title: SandboxRunner MCP Server API
+  description: |
+    SandboxRunner is a comprehensive MCP (Model Context Protocol) server that provides secure, isolated sandbox environments for multi-language code execution. It uses runC containers for isolation and provides a comprehensive set of MCP tools for sandbox management, code execution, and file operations.
+    
+    ## Features
+    
+    - **Multi-language Support**: Python, JavaScript, TypeScript, Go, Rust, Java, C++, C#, Shell scripts
+    - **Package Management**: Automatic package installation (pip, npm, cargo, maven, etc.)
+    - **Container Isolation**: Secure execution using runC containers
+    - **Resource Management**: CPU, memory, and disk limits
+    - **File Operations**: Upload, download, read, write, and list files
+    - **Real-time Execution**: Stream output and handle interactive programs
+    
+    ## Protocol Support
+    
+    This API implements the MCP (Model Context Protocol) specification version 2024-11-05, providing JSON-RPC 2.0 communication over stdio or HTTP.
+    
+  version: 5.2.0
+  contact:
+    name: SandboxRunner Support
+    url: https://github.com/sandboxrunner/mcp-server
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.sandboxrunner.dev
+    description: Production server
+
+tags:
+  - name: sandbox
+    description: Sandbox lifecycle management
+  - name: execution
+    description: Code and command execution
+  - name: files
+    description: File system operations
+  - name: python
+    description: Python-specific execution
+  - name: javascript
+    description: JavaScript/Node.js execution
+  - name: typescript
+    description: TypeScript execution
+  - name: go
+    description: Go execution
+  - name: rust
+    description: Rust execution
+  - name: java
+    description: Java execution
+  - name: cpp
+    description: C++ execution
+  - name: csharp
+    description: C# execution
+  - name: shell
+    description: Shell script execution
+  - name: generic
+    description: Generic code execution with auto-detection
+
+paths:
+  /mcp/tools/create_sandbox:
+    post:
+      tags: [sandbox]
+      summary: Create a new sandbox environment
+      description: |
+        Creates a new isolated sandbox environment with specified configuration.
+        The sandbox uses runC containers for security and resource isolation.
+      operationId: createSandbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSandboxRequest'
+            examples:
+              basic:
+                summary: Basic Ubuntu sandbox
+                value:
+                  image: "ubuntu:22.04"
+                  workspace_dir: "/workspace"
+              python:
+                summary: Python sandbox with limits
+                value:
+                  image: "python:3.11"
+                  workspace_dir: "/workspace"
+                  cpu_limit: "2.0"
+                  memory_limit: "1G"
+                  disk_limit: "5G"
+                  environment:
+                    PYTHONPATH: "/workspace"
+      responses:
+        '200':
+          description: Sandbox created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResult'
+              examples:
+                success:
+                  summary: Successful sandbox creation
+                  value:
+                    text: |
+                      Sandbox created successfully
+                      ID: 12345678-1234-1234-1234-123456789abc
+                      Image: ubuntu:22.04
+                      Status: running
+                      Working Directory: /workspace
+                    is_error: false
+                    metadata:
+                      sandbox_id: "12345678-1234-1234-1234-123456789abc"
+                      container_id: "container-123"
+                      status: "running"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /mcp/tools/list_sandboxes:
+    post:
+      tags: [sandbox]
+      summary: List all sandbox environments
+      description: Returns a list of all sandbox environments and their current status.
+      operationId: listSandboxes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListSandboxesRequest'
+      responses:
+        '200':
+          description: List of sandboxes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResult'
+              examples:
+                multiple_sandboxes:
+                  summary: Multiple sandboxes listed
+                  value:
+                    text: |
+                      Found 2 sandboxes:
+                      
+                      1. ID: 12345678-1234-1234-1234-123456789abc
+                         Status: running
+                         Image: ubuntu:22.04
+                         Created: 2024-01-15T10:30:00Z
+                         
+                      2. ID: 87654321-4321-4321-4321-cba987654321
+                         Status: stopped
+                         Image: python:3.11
+                         Created: 2024-01-15T09:15:00Z
+                    is_error: false
+                    metadata:
+                      total_count: 2
+                      running_count: 1
+                      stopped_count: 1
+
+  /mcp/tools/terminate_sandbox:
+    post:
+      tags: [sandbox]
+      summary: Terminate a sandbox environment
+      description: Terminates and removes a sandbox environment and all its resources.
+      operationId: terminateSandbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminateSandboxRequest'
+      responses:
+        '200':
+          description: Sandbox terminated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResult'
+        '404':
+          $ref: '#/components/responses/SandboxNotFound'
+
+  /mcp/tools/run_code:
+    post:
+      tags: [execution]
+      summary: Execute code with automatic language detection
+      description: |
+        Executes code in a sandbox environment with automatic language detection.
+        Supports Python, JavaScript, TypeScript, Go, Rust, Java, C++, C#, and shell scripts.
+      operationId: runCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCodeRequest'
+            examples:
+              python_auto:
+                summary: Auto-detected Python code
+                value:
+                  sandbox_id: "12345678-1234-1234-1234-123456789abc"
+                  code: |
+                    import math
+                    print("Hello from Python!")
+                    print(f"π = {math.pi}")
+              javascript_explicit:
+                summary: Explicit JavaScript code
+                value:
+                  sandbox_id: "12345678-1234-1234-1234-123456789abc"
+                  code: |
+                    console.log("Hello from Node.js!");
+                    console.log("Version:", process.version);
+                  language: "javascript"
+      responses:
+        '200':
+          description: Code executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/exec_command:
+    post:
+      tags: [execution]
+      summary: Execute shell command
+      description: Executes a shell command in the specified sandbox environment.
+      operationId: execCommand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecCommandRequest'
+      responses:
+        '200':
+          description: Command executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResult'
+
+  /mcp/tools/run_python:
+    post:
+      tags: [python]
+      summary: Execute Python code with pip package support
+      description: |
+        Executes Python code with support for installing pip packages and creating virtual environments.
+        Supports Python 3.7+ with automatic package management.
+      operationId: runPython
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunPythonRequest'
+            examples:
+              with_packages:
+                summary: Python with NumPy and Pandas
+                value:
+                  sandbox_id: "12345678-1234-1234-1234-123456789abc"
+                  code: |
+                    import numpy as np
+                    import pandas as pd
+                    
+                    data = np.random.randn(100, 4)
+                    df = pd.DataFrame(data, columns=['A', 'B', 'C', 'D'])
+                    print(df.head())
+                    print(f"Shape: {df.shape}")
+                    print(f"Mean values:\n{df.mean()}")
+                  packages:
+                    - "numpy>=1.21.0"
+                    - "pandas>=1.3.0"
+              with_venv:
+                summary: Python with virtual environment
+                value:
+                  sandbox_id: "12345678-1234-1234-1234-123456789abc"
+                  code: |
+                    import requests
+                    response = requests.get('https://httpbin.org/json')
+                    print(response.json())
+                  packages: ["requests"]
+                  options:
+                    use_venv: "true"
+      responses:
+        '200':
+          description: Python code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_javascript:
+    post:
+      tags: [javascript]
+      summary: Execute JavaScript/Node.js code with npm package support
+      description: |
+        Executes JavaScript/Node.js code with support for installing npm packages.
+        Supports Node.js 16+ with automatic package management.
+      operationId: runJavaScript
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunJavaScriptRequest'
+      responses:
+        '200':
+          description: JavaScript code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_typescript:
+    post:
+      tags: [typescript]
+      summary: Execute TypeScript code with compilation and npm packages
+      description: |
+        Executes TypeScript code with automatic compilation and npm package support.
+        Supports TypeScript 4.5+ with configurable compilation targets.
+      operationId: runTypeScript
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunTypeScriptRequest'
+      responses:
+        '200':
+          description: TypeScript code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_go:
+    post:
+      tags: [go]
+      summary: Execute Go code with module support
+      description: |
+        Executes Go code with support for Go modules and dependency management.
+        Supports Go 1.18+ with automatic module initialization.
+      operationId: runGo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunGoRequest'
+      responses:
+        '200':
+          description: Go code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_rust:
+    post:
+      tags: [rust]
+      summary: Execute Rust code with Cargo support
+      description: |
+        Executes Rust code with support for Cargo dependencies and build configuration.
+        Supports Rust 1.60+ with configurable edition and features.
+      operationId: runRust
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunRustRequest'
+      responses:
+        '200':
+          description: Rust code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_java:
+    post:
+      tags: [java]
+      summary: Execute Java code with Maven/Gradle support
+      description: |
+        Executes Java code with support for Maven and Gradle dependencies.
+        Supports Java 11+ with automatic build tool detection.
+      operationId: runJava
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunJavaRequest'
+      responses:
+        '200':
+          description: Java code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_cpp:
+    post:
+      tags: [cpp]
+      summary: Execute C++ code with compilation support
+      description: |
+        Executes C++ code with support for various C++ standards and optimization levels.
+        Supports GCC and Clang compilers with configurable flags.
+      operationId: runCpp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCppRequest'
+      responses:
+        '200':
+          description: C++ code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_csharp:
+    post:
+      tags: [csharp]
+      summary: Execute C# code with .NET support
+      description: |
+        Executes C# code with support for .NET and NuGet packages.
+        Supports .NET 6+ with configurable framework versions.
+      operationId: runCSharp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCSharpRequest'
+      responses:
+        '200':
+          description: C# code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_shell:
+    post:
+      tags: [shell]
+      summary: Execute shell scripts
+      description: |
+        Executes shell scripts with support for multiple shell interpreters.
+        Supports bash, sh, zsh, and fish shells with system package installation.
+      operationId: runShell
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunShellRequest'
+      responses:
+        '200':
+          description: Shell script executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/run_generic:
+    post:
+      tags: [generic]
+      summary: Execute code with automatic language detection
+      description: |
+        Executes code with automatic language detection and appropriate execution environment.
+        Falls back to generic execution if language cannot be determined.
+      operationId: runGeneric
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunGenericRequest'
+      responses:
+        '200':
+          description: Code executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+
+  /mcp/tools/upload_file:
+    post:
+      tags: [files]
+      summary: Upload file to sandbox
+      description: Uploads a file to the specified path in the sandbox environment.
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadFileRequest'
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResult'
+
+  /mcp/tools/download_file:
+    post:
+      tags: [files]
+      summary: Download file from sandbox
+      description: Downloads a file from the specified path in the sandbox environment.
+      operationId: downloadFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadFileRequest'
+      responses:
+        '200':
+          description: File downloaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContent'
+
+  /mcp/tools/list_files:
+    post:
+      tags: [files]
+      summary: List files in sandbox directory
+      description: Lists files and directories in the specified path within the sandbox.
+      operationId: listFiles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListFilesRequest'
+      responses:
+        '200':
+          description: Files listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileList'
+
+  /mcp/tools/read_file:
+    post:
+      tags: [files]
+      summary: Read file contents from sandbox
+      description: Reads and returns the contents of a file from the sandbox environment.
+      operationId: readFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadFileRequest'
+      responses:
+        '200':
+          description: File read successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContent'
+
+  /mcp/tools/write_file:
+    post:
+      tags: [files]
+      summary: Write content to file in sandbox
+      description: Writes content to a file at the specified path in the sandbox environment.
+      operationId: writeFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WriteFileRequest'
+      responses:
+        '200':
+          description: File written successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResult'
+
+components:
+  schemas:
+    # Request schemas
+    CreateSandboxRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          description: Container image to use for the sandbox
+          default: "ubuntu:22.04"
+          examples: ["ubuntu:22.04", "python:3.11", "node:18"]
+        workspace_dir:
+          type: string
+          description: Working directory inside the sandbox
+          default: "/workspace"
+        environment:
+          type: object
+          description: Environment variables for the sandbox
+          additionalProperties:
+            type: string
+        cpu_limit:
+          type: string
+          description: CPU limit (e.g., '1.0' for 1 CPU)
+          pattern: '^\\d+(\\.\\d+)?$'
+        memory_limit:
+          type: string
+          description: Memory limit (e.g., '1G' for 1GB)
+          pattern: '^\\d+[KMGT]?B?$'
+        disk_limit:
+          type: string
+          description: Disk limit (e.g., '10G' for 10GB)
+          pattern: '^\\d+[KMGT]?B?$'
+        network_mode:
+          type: string
+          description: Network mode for the sandbox
+          enum: ["none", "bridge", "host"]
+          default: "none"
+
+    ListSandboxesRequest:
+      type: object
+      properties: {}
+
+    TerminateSandboxRequest:
+      type: object
+      required:
+        - sandbox_id
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+
+    RunCodeRequest:
+      type: object
+      required:
+        - sandbox_id
+        - code
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        code:
+          type: string
+          description: The code to execute
+          minLength: 1
+        language:
+          type: string
+          description: Programming language (auto-detected if not provided)
+          enum: ["python", "javascript", "typescript", "bash", "sh", "go", "rust", "java", "cpp", "c"]
+        working_dir:
+          type: string
+          description: Working directory for code execution
+          default: "/workspace"
+        timeout:
+          type: integer
+          description: Execution timeout in seconds
+          minimum: 1
+          maximum: 300
+          default: 30
+
+    ExecCommandRequest:
+      type: object
+      required:
+        - sandbox_id
+        - command
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        command:
+          type: string
+          description: The shell command to execute
+          minLength: 1
+        working_dir:
+          type: string
+          description: Working directory for command execution
+          default: "/workspace"
+        environment:
+          type: object
+          description: Environment variables for the command
+          additionalProperties:
+            type: string
+        timeout:
+          type: integer
+          description: Command timeout in seconds
+          minimum: 1
+          maximum: 300
+          default: 30
+
+    RunPythonRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                use_venv:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Whether to use a virtual environment
+                python_cmd:
+                  type: string
+                  description: Python command to use (default: python3)
+              additionalProperties:
+                type: string
+
+    RunJavaScriptRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                node_version:
+                  type: string
+                  description: Node.js version to use
+              additionalProperties:
+                type: string
+
+    RunTypeScriptRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                target:
+                  type: string
+                  description: TypeScript compilation target
+                  default: "ES2020"
+                tsconfig:
+                  type: object
+                  description: TypeScript configuration options
+              additionalProperties:
+                type: string
+
+    RunGoRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                go_version:
+                  type: string
+                  description: Go version to use
+                build_flags:
+                  type: string
+                  description: Additional build flags
+                module_name:
+                  type: string
+                  description: Go module name
+                  default: "main"
+              additionalProperties:
+                type: string
+
+    RunRustRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                edition:
+                  type: string
+                  description: Rust edition
+                  default: "2021"
+                release:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Build in release mode
+                features:
+                  type: array
+                  items:
+                    type: string
+                  description: Cargo features to enable
+              additionalProperties:
+                type: string
+
+    RunJavaRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                java_version:
+                  type: string
+                  description: Java version to use
+                main_class:
+                  type: string
+                  description: Main class name
+                  default: "Main"
+                classpath:
+                  type: string
+                  description: Additional classpath entries
+                build_tool:
+                  type: string
+                  enum: ["maven", "gradle"]
+                  description: Build tool to use
+                  default: "maven"
+              additionalProperties:
+                type: string
+
+    RunCppRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                std:
+                  type: string
+                  description: C++ standard
+                  default: "c++17"
+                compiler:
+                  type: string
+                  enum: ["g++", "clang++"]
+                  description: C++ compiler to use
+                  default: "g++"
+                optimization:
+                  type: string
+                  enum: ["O0", "O1", "O2", "O3"]
+                  description: Optimization level
+                  default: "O2"
+                extra_flags:
+                  type: string
+                  description: Additional compiler flags
+              additionalProperties:
+                type: string
+
+    RunCSharpRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                framework:
+                  type: string
+                  description: .NET framework version
+                  default: "net8.0"
+                nullable:
+                  type: string
+                  enum: ["enable", "disable"]
+                  description: Nullable reference types
+                  default: "enable"
+                implicit_usings:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Enable implicit using directives
+                  default: "true"
+              additionalProperties:
+                type: string
+
+    RunShellRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            options:
+              type: object
+              properties:
+                shell:
+                  type: string
+                  enum: ["bash", "sh", "zsh", "fish"]
+                  description: Shell interpreter to use
+                  default: "bash"
+                set_flags:
+                  type: string
+                  description: Shell set flags
+              additionalProperties:
+                type: string
+
+    RunGenericRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseLanguageRequest'
+        - type: object
+          properties:
+            language:
+              type: string
+              description: Programming language (auto-detected if not specified)
+              enum: ["python", "javascript", "typescript", "go", "rust", "java", "cpp", "csharp", "shell"]
+            options:
+              type: object
+              description: Language-specific execution options
+              additionalProperties:
+                type: string
+
+    BaseLanguageRequest:
+      type: object
+      required:
+        - sandbox_id
+        - code
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        code:
+          type: string
+          description: Code to execute
+          minLength: 1
+        packages:
+          type: array
+          items:
+            type: string
+          description: Language-specific packages to install
+        files:
+          type: object
+          description: Additional files to create in the workspace
+          additionalProperties:
+            type: string
+        environment:
+          type: object
+          description: Environment variables for execution
+          additionalProperties:
+            type: string
+        working_dir:
+          type: string
+          description: Working directory for execution
+          default: "/workspace"
+        timeout:
+          type: integer
+          description: Execution timeout in seconds
+          minimum: 1
+          maximum: 300
+          default: 30
+        stdin:
+          type: string
+          description: Standard input to provide to the program
+
+    UploadFileRequest:
+      type: object
+      required:
+        - sandbox_id
+        - path
+        - content
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        path:
+          type: string
+          description: The destination path for the file
+          minLength: 1
+        content:
+          type: string
+          description: The file content to upload
+        encoding:
+          type: string
+          description: Content encoding
+          enum: ["base64", "utf8"]
+          default: "utf8"
+
+    DownloadFileRequest:
+      type: object
+      required:
+        - sandbox_id
+        - path
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        path:
+          type: string
+          description: The file path to download
+          minLength: 1
+        encoding:
+          type: string
+          description: Content encoding for the response
+          enum: ["base64", "utf8"]
+          default: "utf8"
+
+    ListFilesRequest:
+      type: object
+      required:
+        - sandbox_id
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        path:
+          type: string
+          description: Directory path to list
+          default: "/workspace"
+        recursive:
+          type: boolean
+          description: List files recursively
+          default: false
+
+    ReadFileRequest:
+      type: object
+      required:
+        - sandbox_id
+        - path
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        path:
+          type: string
+          description: The file path to read
+          minLength: 1
+        encoding:
+          type: string
+          description: Content encoding for the response
+          enum: ["base64", "utf8"]
+          default: "utf8"
+        max_size:
+          type: integer
+          description: Maximum file size to read in bytes
+          minimum: 1
+          maximum: 10485760
+          default: 1048576
+
+    WriteFileRequest:
+      type: object
+      required:
+        - sandbox_id
+        - path
+        - content
+      properties:
+        sandbox_id:
+          $ref: '#/components/schemas/SandboxId'
+        path:
+          type: string
+          description: The file path to write to
+          minLength: 1
+        content:
+          type: string
+          description: The content to write to the file
+        encoding:
+          type: string
+          description: Content encoding
+          enum: ["base64", "utf8"]
+          default: "utf8"
+
+    # Response schemas
+    ToolResult:
+      type: object
+      required:
+        - text
+        - is_error
+      properties:
+        text:
+          type: string
+          description: Human-readable result text
+        is_error:
+          type: boolean
+          description: Whether the result represents an error
+        metadata:
+          type: object
+          description: Additional metadata about the result
+          additionalProperties: true
+
+    CodeExecutionResult:
+      allOf:
+        - $ref: '#/components/schemas/ToolResult'
+        - type: object
+          properties:
+            metadata:
+              type: object
+              properties:
+                language:
+                  type: string
+                  description: Programming language used
+                exit_code:
+                  type: integer
+                  description: Execution exit code
+                stdout:
+                  type: string
+                  description: Standard output
+                stderr:
+                  type: string
+                  description: Standard error output
+                duration:
+                  type: number
+                  description: Execution duration in seconds
+                timed_out:
+                  type: boolean
+                  description: Whether execution timed out
+              additionalProperties: true
+
+    CommandResult:
+      allOf:
+        - $ref: '#/components/schemas/ToolResult'
+        - type: object
+          properties:
+            metadata:
+              type: object
+              properties:
+                exit_code:
+                  type: integer
+                  description: Command exit code
+                stdout:
+                  type: string
+                  description: Standard output
+                stderr:
+                  type: string
+                  description: Standard error output
+                duration:
+                  type: number
+                  description: Execution duration in seconds
+                timed_out:
+                  type: boolean
+                  description: Whether the command timed out
+              additionalProperties: true
+
+    FileContent:
+      allOf:
+        - $ref: '#/components/schemas/ToolResult'
+        - type: object
+          properties:
+            metadata:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: File path
+                size:
+                  type: integer
+                  description: File size in bytes
+                encoding:
+                  type: string
+                  description: Content encoding used
+                content:
+                  type: string
+                  description: File content
+              additionalProperties: true
+
+    FileList:
+      allOf:
+        - $ref: '#/components/schemas/ToolResult'
+        - type: object
+          properties:
+            metadata:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: Directory path listed
+                total_count:
+                  type: integer
+                  description: Total number of files and directories
+                files:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileInfo'
+              additionalProperties: true
+
+    FileInfo:
+      type: object
+      required:
+        - name
+        - path
+        - size
+        - is_dir
+      properties:
+        name:
+          type: string
+          description: File or directory name
+        path:
+          type: string
+          description: Full path to the file or directory
+        size:
+          type: integer
+          description: File size in bytes (0 for directories)
+        is_dir:
+          type: boolean
+          description: Whether this is a directory
+        mode:
+          type: string
+          description: File permissions and type
+        modified:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          description: Additional error details
+        context:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+
+    # Utility schemas
+    SandboxId:
+      type: string
+      description: The unique identifier of the sandbox
+      pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+      example: "12345678-1234-1234-1234-123456789abc"
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INVALID_PARAMETERS"
+            message: "Invalid request parameters"
+            details: "The provided sandbox_id is not a valid UUID"
+
+    SandboxNotFound:
+      description: Sandbox not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "SANDBOX_NOT_FOUND"
+            message: "Sandbox not found"
+            details: "No sandbox found with the specified ID"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INTERNAL_ERROR"
+            message: "An internal server error occurred"
+            details: "Failed to create container"
+
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+security:
+  - ApiKey: []

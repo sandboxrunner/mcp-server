@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "sandboxrunner": {
+      "command": "/path/to/mcp-sandboxd",
+      "args": [
+        "--config", "/path/to/config/mcp-sandboxd.yaml",
+        "--log-level", "info"
+      ],
+      "env": {
+        "SANDBOXRUNNER_LOGGING_LEVEL": "info",
+        "SANDBOXRUNNER_SANDBOX_WORKSPACE_DIR": "/tmp/sandboxrunner/workspaces"
+      }
+    }
+  }
+}

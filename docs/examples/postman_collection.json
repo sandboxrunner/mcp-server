@@ -1,0 +1,514 @@
+{
+  "info": {
+    "name": "SandboxRunner MCP Server API",
+    "description": "Complete API collection for SandboxRunner - secure multi-language code execution platform",
+    "version": "5.2.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "your-api-key-here",
+      "type": "string"
+    },
+    {
+      "key": "sandbox_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Sandbox Management",
+      "item": [
+        {
+          "name": "Create Sandbox",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains sandbox_id', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.metadata).to.have.property('sandbox_id');",
+                  "    pm.globals.set('sandbox_id', responseJson.metadata.sandbox_id);",
+                  "});",
+                  "",
+                  "pm.test('Sandbox is running', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.metadata.status).to.eql('running');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"python:3.11\",\n  \"workspace_dir\": \"/workspace\",\n  \"cpu_limit\": \"2.0\",\n  \"memory_limit\": \"1G\",\n  \"disk_limit\": \"10G\",\n  \"network_mode\": \"bridge\",\n  \"environment\": {\n    \"PYTHONPATH\": \"/workspace\",\n    \"PYTHONUNBUFFERED\": \"1\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/create_sandbox",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "create_sandbox"]
+            },
+            "description": "Creates a new isolated sandbox environment with Python 3.11"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"python:3.11\",\n  \"memory_limit\": \"1G\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/mcp/tools/create_sandbox",
+                  "host": ["{{base_url}}"],
+                  "path": ["mcp", "tools", "create_sandbox"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"text\": \"Sandbox created successfully\\nID: 12345678-1234-1234-1234-123456789abc\\nImage: python:3.11\\nStatus: running\\nWorking Directory: /workspace\",\n  \"is_error\": false,\n  \"metadata\": {\n    \"sandbox_id\": \"12345678-1234-1234-1234-123456789abc\",\n    \"container_id\": \"container-abc123\",\n    \"status\": \"running\",\n    \"image\": \"python:3.11\",\n    \"workspace_dir\": \"/workspace\",\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Sandboxes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/list_sandboxes",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "list_sandboxes"]
+            }
+          }
+        },
+        {
+          "name": "Terminate Sandbox",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/terminate_sandbox",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "terminate_sandbox"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Python Execution",
+      "item": [
+        {
+          "name": "Simple Python Script",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"print('Hello, World!')\\nprint(f'Python version: {__import__('sys').version}')\\nprint(f'2 + 2 = {2 + 2}')\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_python",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_python"]
+            }
+          }
+        },
+        {
+          "name": "Python with NumPy and Pandas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"import numpy as np\\nimport pandas as pd\\n\\n# Create sample data\\ndata = np.random.randn(10, 4)\\ndf = pd.DataFrame(data, columns=['A', 'B', 'C', 'D'])\\n\\nprint('Dataset shape:', df.shape)\\nprint('\\\\nFirst 5 rows:')\\nprint(df.head())\\nprint('\\\\nStatistics:')\\nprint(df.describe())\",\n  \"packages\": [\"numpy>=1.21.0\", \"pandas>=1.3.0\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_python",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_python"]
+            }
+          }
+        },
+        {
+          "name": "Python Web Scraping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"import requests\\nfrom bs4 import BeautifulSoup\\n\\n# Fetch webpage\\nresponse = requests.get('https://httpbin.org/html')\\nprint(f'Status: {response.status_code}')\\n\\n# Parse HTML\\nsoup = BeautifulSoup(response.text, 'html.parser')\\ntitle = soup.find('title').text\\nprint(f'Page title: {title}')\",\n  \"packages\": [\"requests\", \"beautifulsoup4\"],\n  \"options\": {\n    \"use_venv\": \"true\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_python",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_python"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "JavaScript/Node.js Execution",
+      "item": [
+        {
+          "name": "Simple JavaScript",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"console.log('Hello, World!');\\nconsole.log('Node.js version:', process.version);\\nconst arr = [1, 2, 3, 4, 5];\\nconsole.log('Array:', arr);\\nconsole.log('Sum:', arr.reduce((a, b) => a + b, 0));\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_javascript",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_javascript"]
+            }
+          }
+        },
+        {
+          "name": "Express.js Server",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"const express = require('express');\\nconst app = express();\\nconst port = 3000;\\n\\napp.get('/', (req, res) => {\\n  res.json({ message: 'Hello World!', timestamp: new Date().toISOString() });\\n});\\n\\napp.get('/health', (req, res) => {\\n  res.json({ status: 'OK', uptime: process.uptime() });\\n});\\n\\nconsole.log('Express app configured');\\nconsole.log('Routes available:');\\napp._router.stack.forEach(layer => {\\n  if (layer.route) {\\n    console.log(layer.route.path);\\n  }\\n});\",\n  \"packages\": [\"express\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_javascript",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_javascript"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Multi-Language Execution",
+      "item": [
+        {
+          "name": "Go Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"package main\\n\\nimport (\\n\\t\\\"fmt\\\"\\n\\t\\\"runtime\\\"\\n)\\n\\nfunc main() {\\n\\tfmt.Println(\\\"Hello, World!\\\")\\n\\tfmt.Printf(\\\"Go version: %s\\\\n\\\", runtime.Version())\\n\\tfmt.Printf(\\\"Operating system: %s\\\\n\\\", runtime.GOOS)\\n\\tfmt.Printf(\\\"Architecture: %s\\\\n\\\", runtime.GOARCH)\\n\\n\\t// Calculate factorial\\n\\tn := 5\\n\\tresult := factorial(n)\\n\\tfmt.Printf(\\\"Factorial of %d is %d\\\\n\\\", n, result)\\n}\\n\\nfunc factorial(n int) int {\\n\\tif n <= 1 {\\n\\t\\treturn 1\\n\\t}\\n\\treturn n * factorial(n-1)\\n}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_go",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_go"]
+            }
+          }
+        },
+        {
+          "name": "Rust Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"fn main() {\\n    println!(\\\"Hello, World!\\\");\\n    \\n    let numbers = vec![1, 2, 3, 4, 5];\\n    println!(\\\"Numbers: {:?}\\\", numbers);\\n    \\n    let sum: i32 = numbers.iter().sum();\\n    println!(\\\"Sum: {}\\\", sum);\\n    \\n    let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();\\n    println!(\\\"Doubled: {:?}\\\", doubled);\\n    \\n    // Demonstrate ownership\\n    let message = String::from(\\\"Rust is awesome!\\\");\\n    print_message(&message);\\n    println!(\\\"Original message: {}\\\", message);\\n}\\n\\nfn print_message(msg: &str) {\\n    println!(\\\"Message: {}\\\", msg);\\n}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_rust",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_rust"]
+            }
+          }
+        },
+        {
+          "name": "TypeScript Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"interface Person {\\n  name: string;\\n  age: number;\\n}\\n\\nclass Student implements Person {\\n  constructor(public name: string, public age: number, public grade: string) {}\\n\\n  introduce(): string {\\n    return `Hi, I'm ${this.name}, ${this.age} years old, and in grade ${this.grade}`;\\n  }\\n}\\n\\nconst student = new Student('Alice', 20, 'A');\\nconsole.log(student.introduce());\\n\\n// Generic function\\nfunction identity<T>(arg: T): T {\\n  return arg;\\n}\\n\\nconsole.log(identity<string>('TypeScript'));\\nconsole.log(identity<number>(42));\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_typescript",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_typescript"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Operations",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"path\": \"/workspace/data.txt\",\n  \"content\": \"Hello, World!\\nThis is a test file.\\nLine 3 with some data.\",\n  \"encoding\": \"utf8\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/upload_file",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "upload_file"]
+            }
+          }
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"path\": \"/workspace\",\n  \"recursive\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/list_files",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "list_files"]
+            }
+          }
+        },
+        {
+          "name": "Read File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"path\": \"/workspace/data.txt\",\n  \"encoding\": \"utf8\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/read_file",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "read_file"]
+            }
+          }
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"path\": \"/workspace/data.txt\",\n  \"encoding\": \"utf8\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/download_file",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "download_file"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Advanced Examples",
+      "item": [
+        {
+          "name": "Data Science Pipeline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"import pandas as pd\\nimport numpy as np\\nfrom sklearn.model_selection import train_test_split\\nfrom sklearn.ensemble import RandomForestClassifier\\nfrom sklearn.metrics import accuracy_score, classification_report\\nimport matplotlib.pyplot as plt\\n\\n# Generate sample data\\nnp.random.seed(42)\\nn_samples = 1000\\nX = np.random.randn(n_samples, 4)\\ny = (X[:, 0] + X[:, 1] > 0).astype(int)\\n\\n# Create DataFrame\\ndf = pd.DataFrame(X, columns=['feature_1', 'feature_2', 'feature_3', 'feature_4'])\\ndf['target'] = y\\n\\nprint('Dataset Info:')\\nprint(f'Shape: {df.shape}')\\nprint('\\\\nFirst 5 rows:')\\nprint(df.head())\\nprint('\\\\nTarget distribution:')\\nprint(df['target'].value_counts())\\n\\n# Train model\\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\\nmodel.fit(X_train, y_train)\\n\\n# Predictions\\ny_pred = model.predict(X_test)\\naccuracy = accuracy_score(y_test, y_pred)\\n\\nprint(f'\\\\nModel Accuracy: {accuracy:.3f}')\\nprint('\\\\nClassification Report:')\\nprint(classification_report(y_test, y_pred))\\n\\n# Feature importance\\nimportance = model.feature_importances_\\nprint('\\\\nFeature Importance:')\\nfor i, imp in enumerate(importance):\\n    print(f'Feature {i+1}: {imp:.3f}')\\n\\n# Save results\\nresults = {\\n    'accuracy': accuracy,\\n    'feature_importance': importance.tolist(),\\n    'predictions_sample': y_pred[:10].tolist()\\n}\\n\\nimport json\\nwith open('/workspace/model_results.json', 'w') as f:\\n    json.dump(results, f, indent=2)\\n\\nprint('\\\\nResults saved to model_results.json')\",\n  \"packages\": [\"pandas>=1.3.0\", \"numpy>=1.21.0\", \"scikit-learn>=1.0.0\", \"matplotlib>=3.5.0\"],\n  \"timeout\": 120\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_python",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_python"]
+            }
+          }
+        },
+        {
+          "name": "Multi-File Go Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sandbox_id\": \"{{sandbox_id}}\",\n  \"code\": \"package main\\n\\nimport (\\n\\t\\\"fmt\\\"\\n\\t\\\"net/http\\\"\\n\\t\\\"time\\\"\\n\\n\\t\\\"github.com/gin-gonic/gin\\\"\\n)\\n\\nfunc main() {\\n\\tr := gin.Default()\\n\\n\\tr.GET(\\\"/\\\", func(c *gin.Context) {\\n\\t\\tc.JSON(http.StatusOK, gin.H{\\n\\t\\t\\t\\\"message\\\":   \\\"Hello World!\\\",\\n\\t\\t\\t\\\"timestamp\\\": time.Now().Format(time.RFC3339),\\n\\t\\t})\\n\\t})\\n\\n\\tr.GET(\\\"/health\\\", func(c *gin.Context) {\\n\\t\\tc.JSON(http.StatusOK, gin.H{\\n\\t\\t\\t\\\"status\\\": \\\"OK\\\",\\n\\t\\t})\\n\\t})\\n\\n\\tfmt.Println(\\\"Server configured successfully\\\")\\n\\tfmt.Println(\\\"Routes:\\\")\\n\\tfor _, route := range r.Routes() {\\n\\t\\tfmt.Printf(\\\"  %s %s\\\\n\\\", route.Method, route.Path)\\n\\t}\\n\\n\\t// In a real scenario, you would call r.Run(\\\":8080\\\")\\n}\",\n  \"packages\": [\"github.com/gin-gonic/gin@v1.9.1\"],\n  \"files\": {\n    \"go.mod\": \"module example\\n\\ngo 1.19\\n\\nrequire github.com/gin-gonic/gin v1.9.1\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mcp/tools/run_go",
+              "host": ["{{base_url}}"],
+              "path": ["mcp", "tools", "run_go"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure we have a sandbox_id for requests that need it",
+          "if (!pm.globals.get('sandbox_id')) {",
+          "    console.log('No sandbox_id found. Please run \"Create Sandbox\" first.');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test to check response structure",
+          "pm.test('Response has correct structure', function () {",
+          "    const responseJson = pm.response.json();",
+          "    pm.expect(responseJson).to.have.property('text');",
+          "    pm.expect(responseJson).to.have.property('is_error');",
+          "});",
+          "",
+          "// Log response for debugging",
+          "console.log('Response:', pm.response.json());"
+        ]
+      }
+    }
+  ]
+}

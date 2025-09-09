@@ -1,0 +1,231 @@
+{
+  "tool_result": {
+    "type": "object",
+    "title": "Tool Execution Result",
+    "description": "Standard result format for tool execution",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Human-readable result text"
+      },
+      "is_error": {
+        "type": "boolean",
+        "description": "Whether the result represents an error"
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Additional metadata about the result",
+        "additionalProperties": true
+      }
+    },
+    "required": ["text", "is_error"],
+    "additionalProperties": false
+  },
+  "sandbox_info": {
+    "type": "object",
+    "title": "Sandbox Information",
+    "description": "Information about a sandbox instance",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique sandbox identifier",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "container_id": {
+        "type": "string",
+        "description": "Container identifier"
+      },
+      "status": {
+        "type": "string",
+        "description": "Current sandbox status",
+        "enum": ["creating", "running", "stopped", "error"]
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Sandbox working directory path"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Sandbox creation timestamp"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Last update timestamp"
+      },
+      "config": {
+        "type": "object",
+        "description": "Sandbox configuration",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Container image"
+          },
+          "workspace_dir": {
+            "type": "string",
+            "description": "Workspace directory inside container"
+          },
+          "environment": {
+            "type": "object",
+            "description": "Environment variables",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "resources": {
+            "type": "object",
+            "description": "Resource limits",
+            "properties": {
+              "cpu_limit": {
+                "type": "string",
+                "description": "CPU limit"
+              },
+              "memory_limit": {
+                "type": "string",
+                "description": "Memory limit"
+              },
+              "disk_limit": {
+                "type": "string",
+                "description": "Disk limit"
+              }
+            }
+          },
+          "network_mode": {
+            "type": "string",
+            "description": "Network mode"
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Additional sandbox metadata",
+        "additionalProperties": true
+      }
+    },
+    "required": ["id", "container_id", "status"],
+    "additionalProperties": false
+  },
+  "file_info": {
+    "type": "object",
+    "title": "File Information",
+    "description": "Information about a file or directory",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "File or directory name"
+      },
+      "path": {
+        "type": "string",
+        "description": "Full path to the file or directory"
+      },
+      "size": {
+        "type": "integer",
+        "description": "File size in bytes (0 for directories)"
+      },
+      "is_dir": {
+        "type": "boolean",
+        "description": "Whether this is a directory"
+      },
+      "mode": {
+        "type": "string",
+        "description": "File permissions and type"
+      },
+      "modified": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Last modification timestamp"
+      }
+    },
+    "required": ["name", "path", "size", "is_dir"],
+    "additionalProperties": false
+  },
+  "command_result": {
+    "type": "object",
+    "title": "Command Execution Result",
+    "description": "Result of command execution",
+    "properties": {
+      "exit_code": {
+        "type": "integer",
+        "description": "Command exit code"
+      },
+      "stdout": {
+        "type": "string",
+        "description": "Standard output"
+      },
+      "stderr": {
+        "type": "string",
+        "description": "Standard error output"
+      },
+      "duration": {
+        "type": "number",
+        "description": "Execution duration in seconds"
+      },
+      "timed_out": {
+        "type": "boolean",
+        "description": "Whether the command timed out"
+      }
+    },
+    "required": ["exit_code"],
+    "additionalProperties": false
+  },
+  "code_execution_result": {
+    "type": "object",
+    "title": "Code Execution Result",
+    "description": "Result of code execution",
+    "properties": {
+      "language": {
+        "type": "string",
+        "description": "Programming language used"
+      },
+      "exit_code": {
+        "type": "integer",
+        "description": "Execution exit code"
+      },
+      "stdout": {
+        "type": "string",
+        "description": "Standard output"
+      },
+      "stderr": {
+        "type": "string",
+        "description": "Standard error output"
+      },
+      "duration": {
+        "type": "number",
+        "description": "Execution duration in seconds"
+      },
+      "timed_out": {
+        "type": "boolean",
+        "description": "Whether execution timed out"
+      }
+    },
+    "required": ["language", "exit_code"],
+    "additionalProperties": false
+  },
+  "error_response": {
+    "type": "object",
+    "title": "Error Response",
+    "description": "Standard error response format",
+    "properties": {
+      "code": {
+        "type": "string",
+        "description": "Error code"
+      },
+      "message": {
+        "type": "string",
+        "description": "Human-readable error message"
+      },
+      "details": {
+        "type": "string",
+        "description": "Additional error details"
+      },
+      "context": {
+        "type": "object",
+        "description": "Additional error context",
+        "additionalProperties": true
+      }
+    },
+    "required": ["code", "message"],
+    "additionalProperties": false
+  }
+}

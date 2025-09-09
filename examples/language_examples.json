@@ -1,0 +1,416 @@
+{
+  "description": "Comprehensive examples for all SandboxRunner MCP language tools",
+  "examples": {
+    "run_python": [
+      {
+        "title": "Simple Python Hello World",
+        "description": "Basic Python code execution",
+        "request": {
+          "tool": "run_python",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "print('Hello, World!')\nprint('Python version:', __import__('sys').version)"
+          }
+        }
+      },
+      {
+        "title": "Python with packages",
+        "description": "Install and use numpy package",
+        "request": {
+          "tool": "run_python",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "import numpy as np\nprint('NumPy version:', np.__version__)\narr = np.array([1, 2, 3, 4, 5])\nprint('Array:', arr)\nprint('Sum:', np.sum(arr))",
+            "packages": [
+              "numpy"
+            ]
+          }
+        }
+      },
+      {
+        "title": "Python with virtual environment",
+        "description": "Use virtual environment for isolation",
+        "request": {
+          "tool": "run_python",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "import requests\nresponse = requests.get('https://api.github.com')\nprint('Status:', response.status_code)\nprint('Headers:', dict(response.headers))",
+            "packages": [
+              "requests"
+            ],
+            "options": {
+              "use_venv": "true"
+            }
+          }
+        }
+      },
+      {
+        "title": "Python with multiple files",
+        "description": "Create and use multiple Python files",
+        "request": {
+          "tool": "run_python",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "from utils import add_numbers, multiply_numbers\n\nresult1 = add_numbers(5, 3)\nresult2 = multiply_numbers(4, 6)\nprint(f'5 + 3 = {result1}')\nprint(f'4 * 6 = {result2}')",
+            "files": {
+              "utils.py": "def add_numbers(a, b):\n    return a + b\n\ndef multiply_numbers(a, b):\n    return a * b"
+            }
+          }
+        }
+      }
+    ],
+    "run_javascript": [
+      {
+        "title": "Simple JavaScript",
+        "description": "Basic JavaScript/Node.js execution",
+        "request": {
+          "tool": "run_javascript",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "console.log('Hello, World!');\nconsole.log('Node.js version:', process.version);\nconst arr = [1, 2, 3, 4, 5];\nconsole.log('Array:', arr);\nconsole.log('Sum:', arr.reduce((a, b) => a + b, 0));"
+          }
+        }
+      },
+      {
+        "title": "JavaScript with npm packages",
+        "description": "Use lodash library for utility functions",
+        "request": {
+          "tool": "run_javascript",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "const _ = require('lodash');\nconst numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconsole.log('Original array:', numbers);\nconsole.log('Chunked array:', _.chunk(numbers, 3));\nconsole.log('Sum:', _.sum(numbers));\nconsole.log('Max:', _.max(numbers));",
+            "packages": [
+              "lodash"
+            ]
+          }
+        }
+      },
+      {
+        "title": "Express.js web server",
+        "description": "Create a simple web server with Express",
+        "request": {
+          "tool": "run_javascript",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "const express = require('express');\nconst app = express();\nconst port = 3000;\n\napp.get('/', (req, res) => {\n  res.json({ message: 'Hello World!', timestamp: new Date().toISOString() });\n});\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'OK', uptime: process.uptime() });\n});\n\nconst server = app.listen(port, () => {\n  console.log(`Server running at http://localhost:${port}`);\n});\n\n// Stop server after 5 seconds for demo\nsetTimeout(() => {\n  server.close();\n  console.log('Server stopped');\n}, 5000);",
+            "packages": [
+              "express"
+            ]
+          }
+        }
+      }
+    ],
+    "run_typescript": [
+      {
+        "title": "Simple TypeScript",
+        "description": "Basic TypeScript compilation and execution",
+        "request": {
+          "tool": "run_typescript",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "interface Person {\n  name: string;\n  age: number;\n}\n\nclass Student implements Person {\n  constructor(public name: string, public age: number, public grade: string) {}\n\n  introduce(): string {\n    return `Hi, I'm ${this.name}, ${this.age} years old, and in grade ${this.grade}`;\n  }\n}\n\nconst student = new Student('Alice', 20, 'A');\nconsole.log(student.introduce());"
+          }
+        }
+      },
+      {
+        "title": "TypeScript with external types",
+        "description": "Use Node.js types and lodash",
+        "request": {
+          "tool": "run_typescript",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "import * as fs from 'fs';\nimport * as path from 'path';\nimport * as _ from 'lodash';\n\ninterface FileInfo {\n  name: string;\n  size: number;\n  isDirectory: boolean;\n}\n\nconst currentDir = process.cwd();\nconsole.log('Current directory:', currentDir);\n\nconst files: FileInfo[] = fs.readdirSync(currentDir).map(file => {\n  const fullPath = path.join(currentDir, file);\n  const stats = fs.statSync(fullPath);\n  return {\n    name: file,\n    size: stats.size,\n    isDirectory: stats.isDirectory()\n  };\n});\n\nconsole.log('Files:', files);\nconsole.log('Total files:', files.length);\nconsole.log('Directories:', _.filter(files, { isDirectory: true }).length);",
+            "packages": [
+              "@types/node",
+              "lodash",
+              "@types/lodash"
+            ]
+          }
+        }
+      }
+    ],
+    "run_go": [
+      {
+        "title": "Simple Go program",
+        "description": "Basic Go code execution",
+        "request": {
+          "tool": "run_go",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"runtime\"\n)\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n\tfmt.Printf(\"Go version: %s\\n\", runtime.Version())\n\tfmt.Printf(\"Operating system: %s\\n\", runtime.GOOS)\n\tfmt.Printf(\"Architecture: %s\\n\", runtime.GOARCH)\n\n\t// Calculate factorial\n\tn := 5\n\tresult := factorial(n)\n\tfmt.Printf(\"Factorial of %d is %d\\n\", n, result)\n}\n\nfunc factorial(n int) int {\n\tif n <= 1 {\n\t\treturn 1\n\t}\n\treturn n * factorial(n-1)\n}"
+          }
+        }
+      },
+      {
+        "title": "Go with external modules",
+        "description": "Use Gin web framework",
+        "request": {
+          "tool": "run_go",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "package main\n\nimport (\n\t\"net/http\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc main() {\n\tr := gin.Default()\n\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"message\":   \"Hello World!\",\n\t\t\t\"timestamp\": time.Now().Format(time.RFC3339),\n\t\t})\n\t})\n\n\tr.GET(\"/health\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"status\": \"OK\",\n\t\t})\n\t})\n\n\tfmt.Println(\"Server starting on :8080\")\n\t// For demo, we would normally call r.Run(\":8080\")\n\tfmt.Println(\"Server would be running...\")\n}",
+            "packages": [
+              "github.com/gin-gonic/gin@v1.9.1"
+            ]
+          }
+        }
+      }
+    ],
+    "run_rust": [
+      {
+        "title": "Simple Rust program",
+        "description": "Basic Rust code execution",
+        "request": {
+          "tool": "run_rust",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "fn main() {\n    println!(\"Hello, World!\");\n    \n    let numbers = vec![1, 2, 3, 4, 5];\n    println!(\"Numbers: {:?}\", numbers);\n    \n    let sum: i32 = numbers.iter().sum();\n    println!(\"Sum: {}\", sum);\n    \n    let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();\n    println!(\"Doubled: {:?}\", doubled);\n    \n    // Demonstrate ownership\n    let message = String::from(\"Rust is awesome!\");\n    print_message(&message);\n    println!(\"Original message: {}\", message);\n}\n\nfn print_message(msg: &str) {\n    println!(\"Message: {}\", msg);\n}"
+          }
+        }
+      },
+      {
+        "title": "Rust with Serde for JSON",
+        "description": "Use Serde for JSON serialization/deserialization",
+        "request": {
+          "tool": "run_rust",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "use serde::{Deserialize, Serialize};\n\n#[derive(Serialize, Deserialize, Debug)]\nstruct Person {\n    name: String,\n    age: u32,\n    email: String,\n}\n\nfn main() {\n    let person = Person {\n        name: \"Alice\".to_string(),\n        age: 30,\n        email: \"alice@example.com\".to_string(),\n    };\n\n    // Serialize to JSON\n    let json = serde_json::to_string_pretty(&person).unwrap();\n    println!(\"Serialized JSON:\\n{}\", json);\n\n    // Deserialize from JSON\n    let json_str = r#\"\n    {\n        \"name\": \"Bob\",\n        \"age\": 25,\n        \"email\": \"bob@example.com\"\n    }\n    \"#;\n\n    let person2: Person = serde_json::from_str(json_str).unwrap();\n    println!(\"Deserialized: {:?}\", person2);\n}",
+            "packages": [
+              "serde = { version = \\\"1.0\\\", features = [\\\"derive\\\"] }\", \"serde_json = \\\"1.0\\\""
+            ]
+          }
+        }
+      }
+    ],
+    "run_java": [
+      {
+        "title": "Simple Java program",
+        "description": "Basic Java code execution",
+        "request": {
+          "tool": "run_java",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n        System.out.println(\"Java version: \" + System.getProperty(\"java.version\"));\n        \n        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\n        System.out.println(\"Original numbers: \" + numbers);\n        \n        List<Integer> evenNumbers = numbers.stream()\n            .filter(n -> n % 2 == 0)\n            .collect(Collectors.toList());\n        System.out.println(\"Even numbers: \" + evenNumbers);\n        \n        int sum = numbers.stream().mapToInt(Integer::intValue).sum();\n        System.out.println(\"Sum: \" + sum);\n        \n        OptionalDouble average = numbers.stream().mapToInt(Integer::intValue).average();\n        if (average.isPresent()) {\n            System.out.println(\"Average: \" + average.getAsDouble());\n        }\n    }\n}"
+          }
+        }
+      }
+    ],
+    "run_cpp": [
+      {
+        "title": "Simple C++ program",
+        "description": "Basic C++ code execution",
+        "request": {
+          "tool": "run_cpp",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <numeric>\n\nint main() {\n    std::cout << \"Hello, World!\" << std::endl;\n    std::cout << \"C++ Standard: \" << __cplusplus << std::endl;\n    \n    std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n    std::cout << \"Original numbers: \";\n    for (const auto& n : numbers) {\n        std::cout << n << \" \";\n    }\n    std::cout << std::endl;\n    \n    // Filter even numbers\n    std::vector<int> evenNumbers;\n    std::copy_if(numbers.begin(), numbers.end(), std::back_inserter(evenNumbers),\n                 [](int n) { return n % 2 == 0; });\n    \n    std::cout << \"Even numbers: \";\n    for (const auto& n : evenNumbers) {\n        std::cout << n << \" \";\n    }\n    std::cout << std::endl;\n    \n    // Calculate sum\n    int sum = std::accumulate(numbers.begin(), numbers.end(), 0);\n    std::cout << \"Sum: \" << sum << std::endl;\n    \n    // Find maximum\n    auto maxElement = *std::max_element(numbers.begin(), numbers.end());\n    std::cout << \"Max element: \" << maxElement << std::endl;\n    \n    return 0;\n}"
+          }
+        }
+      },
+      {
+        "title": "C++ with custom optimization",
+        "description": "Compile with custom compiler flags",
+        "request": {
+          "tool": "run_cpp",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "#include <iostream>\n#include <chrono>\n#include <vector>\n\nlong fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nint main() {\n    const int n = 35;\n    \n    auto start = std::chrono::high_resolution_clock::now();\n    long result = fibonacci(n);\n    auto end = std::chrono::high_resolution_clock::now();\n    \n    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);\n    \n    std::cout << \"Fibonacci(\" << n << \") = \" << result << std::endl;\n    std::cout << \"Time taken: \" << duration.count() << \" ms\" << std::endl;\n    \n    return 0;\n}",
+            "options": {
+              "std": "c++20",
+              "optimization": "O3",
+              "extra_flags": "-march=native"
+            }
+          }
+        }
+      }
+    ],
+    "run_csharp": [
+      {
+        "title": "Simple C# program",
+        "description": "Basic C# code execution",
+        "request": {
+          "tool": "run_csharp",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n        Console.WriteLine($\"Runtime version: {Environment.Version}\");\n        \n        var numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };\n        Console.WriteLine($\"Original numbers: [{string.Join(\", \", numbers)}]\");\n        \n        var evenNumbers = numbers.Where(n => n % 2 == 0).ToList();\n        Console.WriteLine($\"Even numbers: [{string.Join(\", \", evenNumbers)}]\");\n        \n        var sum = numbers.Sum();\n        Console.WriteLine($\"Sum: {sum}\");\n        \n        var average = numbers.Average();\n        Console.WriteLine($\"Average: {average:F2}\");\n        \n        // Demonstrate LINQ\n        var result = numbers\n            .Where(n => n > 5)\n            .Select(n => n * n)\n            .OrderByDescending(n => n)\n            .Take(3)\n            .ToList();\n        \n        Console.WriteLine($\"Top 3 squares of numbers > 5: [{string.Join(\", \", result)}]\");\n    }\n}"
+          }
+        }
+      },
+      {
+        "title": "C# with Newtonsoft.Json",
+        "description": "Use JSON.NET for serialization",
+        "request": {
+          "tool": "run_csharp",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "using System;\nusing System.Collections.Generic;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\n\npublic class Person\n{\n    public string Name { get; set; }\n    public int Age { get; set; }\n    public string Email { get; set; }\n    public List<string> Hobbies { get; set; } = new List<string>();\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var person = new Person\n        {\n            Name = \"Alice Johnson\",\n            Age = 28,\n            Email = \"alice@example.com\",\n            Hobbies = { \"reading\", \"programming\", \"hiking\" }\n        };\n        \n        // Serialize to JSON with pretty formatting\n        var settings = new JsonSerializerSettings\n        {\n            ContractResolver = new CamelCasePropertyNamesContractResolver(),\n            Formatting = Formatting.Indented\n        };\n        \n        string json = JsonConvert.SerializeObject(person, settings);\n        Console.WriteLine(\"Serialized JSON:\");\n        Console.WriteLine(json);\n        \n        // Deserialize back to object\n        var deserializedPerson = JsonConvert.DeserializeObject<Person>(json, settings);\n        Console.WriteLine($\"\\nDeserialized: {deserializedPerson.Name}, Age: {deserializedPerson.Age}\");\n        Console.WriteLine($\"Hobbies: {string.Join(\", \", deserializedPerson.Hobbies)}\");\n    }\n}",
+            "packages": [
+              "Newtonsoft.Json"
+            ]
+          }
+        }
+      }
+    ],
+    "run_shell": [
+      {
+        "title": "Simple shell script",
+        "description": "Basic shell script execution",
+        "request": {
+          "tool": "run_shell",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "#!/bin/bash\necho \"Hello, World!\"\necho \"Current user: $(whoami)\"\necho \"Current directory: $(pwd)\"\necho \"Date: $(date)\"\necho \"Shell: $SHELL\"\n\n# Create a simple file and show its contents\necho \"This is a test file\" > test.txt\necho \"Created file contents:\"\ncat test.txt\n\n# Show system information\necho \"\\nSystem information:\"\necho \"OS: $(uname -s)\"\necho \"Kernel: $(uname -r)\"\necho \"Architecture: $(uname -m)\"\n\n# Cleanup\nrm test.txt\necho \"Cleaned up temporary file\""
+          }
+        }
+      },
+      {
+        "title": "Shell with system packages",
+        "description": "Install and use system tools",
+        "request": {
+          "tool": "run_shell",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "#!/bin/bash\n\necho \"Testing installed tools:\"\n\n# Test curl\necho \"\\nTesting curl:\"\ncurl -s -o /dev/null -w \"HTTP Status: %{http_code}\\n\" https://httpbin.org/get\n\n# Test jq\necho \"\\nTesting jq with sample JSON:\"\necho '{\"name\": \"Alice\", \"age\": 30, \"city\": \"New York\"}' | jq '.name'\n\n# Test git\necho \"\\nTesting git:\"\ngit --version\n\n# Create a sample data processing pipeline\necho \"\\nData processing example:\"\necho -e \"apple,5\\nbanana,3\\ncherry,8\\ndate,2\" > fruits.csv\necho \"Original data:\"\ncat fruits.csv\n\necho \"\\nFiltered data (quantity > 3):\"\nawk -F, '$2 > 3 {print $1 \" has \" $2 \" items\"}' fruits.csv\n\n# Cleanup\nrm fruits.csv",
+            "packages": [
+              "curl",
+              "jq",
+              "git"
+            ]
+          }
+        }
+      }
+    ],
+    "run_generic": [
+      {
+        "title": "Auto-detect Python",
+        "description": "Automatically detect and run Python code",
+        "request": {
+          "tool": "run_generic",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "import math\nimport random\n\ndef calculate_pi(iterations):\n    inside_circle = 0\n    total_points = iterations\n    \n    for _ in range(iterations):\n        x = random.uniform(-1, 1)\n        y = random.uniform(-1, 1)\n        if x*x + y*y <= 1:\n            inside_circle += 1\n    \n    return 4 * inside_circle / total_points\n\nprint('Estimating π using Monte Carlo method...')\nfor i in [1000, 10000, 100000]:\n    pi_estimate = calculate_pi(i)\n    error = abs(pi_estimate - math.pi)\n    print(f'Iterations: {i:6d}, π ≈ {pi_estimate:.6f}, Error: {error:.6f}')\n\nprint(f'Actual π: {math.pi:.6f}')"
+          }
+        }
+      },
+      {
+        "title": "Auto-detect JavaScript",
+        "description": "Automatically detect and run JavaScript code",
+        "request": {
+          "tool": "run_generic",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "code": "const fs = require('fs');\nconst path = require('path');\n\n// Fibonacci sequence generator\nfunction* fibonacci() {\n    let a = 0, b = 1;\n    while (true) {\n        yield a;\n        [a, b] = [b, a + b];\n    }\n}\n\n// Generate first 15 Fibonacci numbers\nconst fib = fibonacci();\nconst fibNumbers = [];\nfor (let i = 0; i < 15; i++) {\n    fibNumbers.push(fib.next().value);\n}\n\nconsole.log('First 15 Fibonacci numbers:');\nconsole.log(fibNumbers.join(', '));\n\n// Calculate golden ratio approximation\nconst goldenRatio = fibNumbers[fibNumbers.length - 1] / fibNumbers[fibNumbers.length - 2];\nconsole.log(`\\nGolden ratio approximation: ${goldenRatio}`);\nconsole.log(`Actual golden ratio: ${(1 + Math.sqrt(5)) / 2}`);"
+          }
+        }
+      },
+      {
+        "title": "Force specific language",
+        "description": "Override auto-detection with explicit language",
+        "request": {
+          "tool": "run_generic",
+          "parameters": {
+            "sandbox_id": "12345678-1234-1234-1234-123456789abc",
+            "language": "go",
+            "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"math/rand\"\n\t\"time\"\n)\n\nfunc quicksort(arr []int) []int {\n\tif len(arr) <= 1 {\n\t\treturn arr\n\t}\n\n\tpivot := arr[len(arr)/2]\n\tvar less, equal, greater []int\n\n\tfor _, v := range arr {\n\t\tswitch {\n\t\tcase v < pivot:\n\t\t\tless = append(less, v)\n\t\tcase v == pivot:\n\t\t\tequal = append(equal, v)\n\t\tdefault:\n\t\t\tgreater = append(greater, v)\n\t\t}\n\t}\n\n\tresult := append(quicksort(less), equal...)\n\treturn append(result, quicksort(greater)...)\n}\n\nfunc main() {\n\trand.Seed(time.Now().UnixNano())\n\t\n\t// Generate random array\n\tarr := make([]int, 20)\n\tfor i := range arr {\n\t\tarr[i] = rand.Intn(100)\n\t}\n\t\n\tfmt.Println(\"Original array:\", arr)\n\t\n\tstart := time.Now()\n\tsorted := quicksort(arr)\n\tduration := time.Since(start)\n\t\n\tfmt.Println(\"Sorted array:\", sorted)\n\tfmt.Printf(\"Sorting took: %v\\n\", duration)\n}"
+          }
+        }
+      }
+    ]
+  },
+  "common_patterns": {
+    "multi_file_projects": {
+      "description": "Examples of creating projects with multiple files",
+      "python_web_app": {
+        "main_file": "from flask import Flask, jsonify\\nfrom utils import get_user_data\\n\\napp = Flask(__name__)\\n\\n@app.route('/')\\ndef home():\\n    return jsonify({'message': 'Welcome to the API'})\\n\\n@app.route('/user/<int:user_id>')\\ndef get_user(user_id):\\n    user = get_user_data(user_id)\\n    return jsonify(user)\\n\\nif __name__ == '__main__':\\n    app.run(host='0.0.0.0', port=5000)",
+        "files": {
+          "utils.py": "users_db = {\\n    1: {'name': 'Alice', 'email': 'alice@example.com'},\\n    2: {'name': 'Bob', 'email': 'bob@example.com'}\\n}\\n\\ndef get_user_data(user_id):\\n    return users_db.get(user_id, {'error': 'User not found'})",
+          "requirements.txt": "flask>=2.0.0"
+        }
+      }
+    },
+    "package_management": {
+      "description": "Examples of package installation and management",
+      "version_pinning": {
+        "python": [
+          "numpy==1.21.0",
+          "pandas>=1.3.0,<2.0.0"
+        ],
+        "javascript": [
+          "lodash@4.17.21",
+          "express@^4.18.0"
+        ],
+        "go": [
+          "github.com/gin-gonic/gin@v1.9.1"
+        ],
+        "rust": [
+          "serde = { version = \\\"1.0\\\", features = [\\\"derive\\\"] }"
+        ]
+      }
+    },
+    "error_handling": {
+      "description": "Common error scenarios and solutions",
+      "timeout_example": {
+        "problem": "Code execution times out",
+        "solution": "Increase timeout parameter",
+        "example": {
+          "timeout": 120
+        }
+      },
+      "package_not_found": {
+        "problem": "Package installation fails",
+        "solution": "Check package name and version compatibility",
+        "example": {
+          "packages": [
+            "numpy>=1.21.0"
+          ]
+        }
+      }
+    }
+  },
+  "advanced_usage": {
+    "environment_variables": {
+      "description": "Setting custom environment variables",
+      "example": {
+        "environment": {
+          "DATABASE_URL": "sqlite:///app.db",
+          "API_KEY": "your-secret-key",
+          "DEBUG": "true"
+        }
+      }
+    },
+    "stdin_input": {
+      "description": "Providing input to interactive programs",
+      "example": {
+        "code": "name = input('Enter your name: ')\\nage = input('Enter your age: ')\\nprint(f'Hello {name}, you are {age} years old!')",
+        "stdin": "Alice\\n25"
+      }
+    },
+    "custom_working_directory": {
+      "description": "Specify custom working directory",
+      "example": {
+        "working_dir": "/tmp/myproject"
+      }
+    }
+  },
+  "best_practices": {
+    "security": [
+      "Always validate input parameters",
+      "Use specific package versions to ensure reproducibility",
+      "Avoid hardcoding sensitive information in code",
+      "Use appropriate timeout values to prevent resource exhaustion"
+    ],
+    "performance": [
+      "Use compiled languages (Go, Rust, C++) for CPU-intensive tasks",
+      "Consider memory usage for large data processing",
+      "Use appropriate compiler optimizations for C/C++",
+      "Profile code execution times using built-in language tools"
+    ],
+    "debugging": [
+      "Use detailed error messages and logging",
+      "Test with simple examples before complex code",
+      "Check package compatibility and versions",
+      "Use language-specific debugging tools and techniques"
+    ]
+  }
+}

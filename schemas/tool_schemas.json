@@ -1,0 +1,1038 @@
+{
+  "create_sandbox": {
+    "type": "object",
+    "title": "Create Sandbox Parameters",
+    "description": "Parameters for creating a new sandbox environment",
+    "properties": {
+      "image": {
+        "type": "string",
+        "description": "Container image to use for the sandbox",
+        "default": "ubuntu:22.04",
+        "examples": ["ubuntu:22.04", "python:3.11", "node:18"]
+      },
+      "workspace_dir": {
+        "type": "string",
+        "description": "Working directory inside the sandbox",
+        "default": "/workspace"
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for the sandbox",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "cpu_limit": {
+        "type": "string",
+        "description": "CPU limit (e.g., '1.0' for 1 CPU)",
+        "pattern": "^\\d+(\\.\\d+)?$"
+      },
+      "memory_limit": {
+        "type": "string",
+        "description": "Memory limit (e.g., '1G' for 1GB)",
+        "pattern": "^\\d+[KMGT]?B?$"
+      },
+      "disk_limit": {
+        "type": "string",
+        "description": "Disk limit (e.g., '10G' for 10GB)",
+        "pattern": "^\\d+[KMGT]?B?$"
+      },
+      "network_mode": {
+        "type": "string",
+        "description": "Network mode for the sandbox",
+        "enum": ["none", "bridge", "host"],
+        "default": "none"
+      }
+    },
+    "additionalProperties": false
+  },
+  "terminate_sandbox": {
+    "type": "object",
+    "title": "Terminate Sandbox Parameters",
+    "description": "Parameters for terminating a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox to terminate",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      }
+    },
+    "required": ["sandbox_id"],
+    "additionalProperties": false
+  },
+  "exec_command": {
+    "type": "object",
+    "title": "Execute Command Parameters",
+    "description": "Parameters for executing a shell command in a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "command": {
+        "type": "string",
+        "description": "The shell command to execute",
+        "minLength": 1
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for command execution",
+        "default": "/workspace"
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for the command",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Command timeout in seconds",
+        "minimum": 1,
+        "maximum": 300,
+        "default": 30
+      }
+    },
+    "required": ["sandbox_id", "command"],
+    "additionalProperties": false
+  },
+  "run_code": {
+    "type": "object",
+    "title": "Run Code Parameters",
+    "description": "Parameters for executing code in a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "The code to execute",
+        "minLength": 1
+      },
+      "language": {
+        "type": "string",
+        "description": "Programming language (auto-detected if not provided)",
+        "enum": ["python", "javascript", "typescript", "bash", "sh", "go", "rust", "java", "cpp", "c"]
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for code execution",
+        "default": "/workspace"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds",
+        "minimum": 1,
+        "maximum": 300,
+        "default": 30
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "upload_file": {
+    "type": "object",
+    "title": "Upload File Parameters",
+    "description": "Parameters for uploading a file to a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "path": {
+        "type": "string",
+        "description": "The destination path for the file",
+        "minLength": 1
+      },
+      "content": {
+        "type": "string",
+        "description": "The file content to upload"
+      },
+      "encoding": {
+        "type": "string",
+        "description": "Content encoding",
+        "enum": ["base64", "utf8"],
+        "default": "utf8"
+      }
+    },
+    "required": ["sandbox_id", "path", "content"],
+    "additionalProperties": false
+  },
+  "download_file": {
+    "type": "object",
+    "title": "Download File Parameters",
+    "description": "Parameters for downloading a file from a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "path": {
+        "type": "string",
+        "description": "The file path to download",
+        "minLength": 1
+      },
+      "encoding": {
+        "type": "string",
+        "description": "Content encoding for the response",
+        "enum": ["base64", "utf8"],
+        "default": "utf8"
+      }
+    },
+    "required": ["sandbox_id", "path"],
+    "additionalProperties": false
+  },
+  "list_files": {
+    "type": "object",
+    "title": "List Files Parameters",
+    "description": "Parameters for listing files in a sandbox directory",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "path": {
+        "type": "string",
+        "description": "Directory path to list",
+        "default": "/workspace"
+      },
+      "recursive": {
+        "type": "boolean",
+        "description": "List files recursively",
+        "default": false
+      }
+    },
+    "required": ["sandbox_id"],
+    "additionalProperties": false
+  },
+  "read_file": {
+    "type": "object",
+    "title": "Read File Parameters",
+    "description": "Parameters for reading a file from a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "path": {
+        "type": "string",
+        "description": "The file path to read",
+        "minLength": 1
+      },
+      "encoding": {
+        "type": "string",
+        "description": "Content encoding for the response",
+        "enum": ["base64", "utf8"],
+        "default": "utf8"
+      },
+      "max_size": {
+        "type": "integer",
+        "description": "Maximum file size to read in bytes",
+        "minimum": 1,
+        "maximum": 10485760,
+        "default": 1048576
+      }
+    },
+    "required": ["sandbox_id", "path"],
+    "additionalProperties": false
+  },
+  "write_file": {
+    "type": "object",
+    "title": "Write File Parameters",
+    "description": "Parameters for writing content to a file in a sandbox",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "path": {
+        "type": "string",
+        "description": "The file path to write to",
+        "minLength": 1
+      },
+      "content": {
+        "type": "string",
+        "description": "The content to write to the file"
+      },
+      "encoding": {
+        "type": "string",
+        "description": "Content encoding",
+        "enum": ["base64", "utf8"],
+        "default": "utf8"
+      }
+    },
+    "required": ["sandbox_id", "path", "content"],
+    "additionalProperties": false
+  },
+  "list_sandboxes": {
+    "type": "object",
+    "title": "List Sandboxes Parameters",
+    "description": "Parameters for listing sandbox environments",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "run_python": {
+    "type": "object",
+    "title": "Run Python Code Parameters",
+    "description": "Parameters for executing Python code with pip package support",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Python code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Python packages to install via pip (e.g., ['numpy', 'pandas==1.5.0'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace (filename -> content)",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Python-specific options",
+        "properties": {
+          "use_venv": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "description": "Whether to use a virtual environment"
+          },
+          "python_cmd": {
+            "type": "string",
+            "description": "Python command to use (default: python3)"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_javascript": {
+    "type": "object",
+    "title": "Run JavaScript Code Parameters",
+    "description": "Parameters for executing JavaScript/Node.js code with npm package support",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "JavaScript/Node.js code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "NPM packages to install (e.g., ['lodash', 'express@^4.18.0'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "JavaScript-specific options",
+        "properties": {
+          "node_version": {
+            "type": "string",
+            "description": "Node.js version to use"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_typescript": {
+    "type": "object",
+    "title": "Run TypeScript Code Parameters",
+    "description": "Parameters for executing TypeScript code with compilation support and npm packages",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "TypeScript code to execute (will be compiled automatically)",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "NPM packages to install (e.g., ['@types/node', 'lodash'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "TypeScript-specific options",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "TypeScript compilation target (ES2020, ES2021, etc.)",
+            "default": "ES2020"
+          },
+          "tsconfig": {
+            "type": "object",
+            "description": "TypeScript configuration options"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_go": {
+    "type": "object",
+    "title": "Run Go Code Parameters",
+    "description": "Parameters for executing Go code with module support and dependency management",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Go code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Go modules to install (e.g., ['github.com/gin-gonic/gin@v1.9.0'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Go-specific options",
+        "properties": {
+          "go_version": {
+            "type": "string",
+            "description": "Go version to use"
+          },
+          "build_flags": {
+            "type": "string",
+            "description": "Additional build flags"
+          },
+          "module_name": {
+            "type": "string",
+            "description": "Go module name (default: main)",
+            "default": "main"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_rust": {
+    "type": "object",
+    "title": "Run Rust Code Parameters",
+    "description": "Parameters for executing Rust code with Cargo support and dependency management",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Rust code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Rust crates to add as dependencies (e.g., ['serde = \"1.0\"', 'tokio = { version = \"1.0\", features = [\"full\"] }'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Rust-specific options",
+        "properties": {
+          "edition": {
+            "type": "string",
+            "description": "Rust edition (2018, 2021)",
+            "default": "2021"
+          },
+          "release": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "description": "Build in release mode"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Cargo features to enable"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 60)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_java": {
+    "type": "object",
+    "title": "Run Java Code Parameters",
+    "description": "Parameters for executing Java code with compilation and Maven/Gradle dependency support",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Java code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Maven/Gradle dependencies (e.g., ['com.google.gson:gson:2.8.9'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Java-specific options",
+        "properties": {
+          "java_version": {
+            "type": "string",
+            "description": "Java version to use"
+          },
+          "main_class": {
+            "type": "string",
+            "description": "Main class name (default: Main)",
+            "default": "Main"
+          },
+          "classpath": {
+            "type": "string",
+            "description": "Additional classpath entries"
+          },
+          "build_tool": {
+            "type": "string",
+            "enum": ["maven", "gradle"],
+            "description": "Build tool to use for dependencies",
+            "default": "maven"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 60)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_cpp": {
+    "type": "object",
+    "title": "Run C++ Code Parameters",
+    "description": "Parameters for executing C++ code with compilation support and library management",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "C++ code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "System packages/libraries to install (e.g., ['libboost-dev', 'libeigen3-dev'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "C++-specific options",
+        "properties": {
+          "std": {
+            "type": "string",
+            "description": "C++ standard (c++11, c++14, c++17, c++20)",
+            "default": "c++17"
+          },
+          "compiler": {
+            "type": "string",
+            "enum": ["g++", "clang++"],
+            "description": "C++ compiler to use",
+            "default": "g++"
+          },
+          "optimization": {
+            "type": "string",
+            "enum": ["O0", "O1", "O2", "O3"],
+            "description": "Optimization level",
+            "default": "O2"
+          },
+          "extra_flags": {
+            "type": "string",
+            "description": "Additional compiler flags"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 45)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_csharp": {
+    "type": "object",
+    "title": "Run C# Code Parameters",
+    "description": "Parameters for executing C# code with .NET support and NuGet package management",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "C# code to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "NuGet packages to install (e.g., ['Newtonsoft.Json', 'Microsoft.Extensions.Logging'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "C#-specific options",
+        "properties": {
+          "framework": {
+            "type": "string",
+            "description": ".NET framework version (net6.0, net7.0, net8.0)",
+            "default": "net8.0"
+          },
+          "nullable": {
+            "type": "string",
+            "enum": ["enable", "disable"],
+            "description": "Nullable reference types",
+            "default": "enable"
+          },
+          "implicit_usings": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "description": "Enable implicit using directives",
+            "default": "true"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 45)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_shell": {
+    "type": "object",
+    "title": "Run Shell Script Parameters",
+    "description": "Parameters for executing shell scripts with support for multiple shell interpreters",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Shell script to execute",
+        "minLength": 1
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "System packages to install (e.g., ['curl', 'jq', 'git'])"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Shell-specific options",
+        "properties": {
+          "shell": {
+            "type": "string",
+            "enum": ["bash", "sh", "zsh", "fish"],
+            "description": "Shell interpreter to use",
+            "default": "bash"
+          },
+          "set_flags": {
+            "type": "string",
+            "description": "Shell set flags (e.g., '-euo pipefail')"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  },
+  "run_generic": {
+    "type": "object",
+    "title": "Run Generic Code Parameters",
+    "description": "Parameters for executing code in any supported language with automatic detection and package management",
+    "properties": {
+      "sandbox_id": {
+        "type": "string",
+        "description": "The unique identifier of the sandbox",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
+      "code": {
+        "type": "string",
+        "description": "Code to execute in any supported language",
+        "minLength": 1
+      },
+      "language": {
+        "type": "string",
+        "description": "Programming language (optional - will be auto-detected if not specified)",
+        "enum": [
+          "python", "javascript", "typescript", "go", "rust", 
+          "java", "cpp", "csharp", "shell"
+        ]
+      },
+      "packages": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Language-specific packages to install"
+      },
+      "files": {
+        "type": "object",
+        "description": "Additional files to create in the workspace",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "options": {
+        "type": "object",
+        "description": "Language-specific execution options",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "environment": {
+        "type": "object",
+        "description": "Environment variables for execution",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "Working directory for execution (default: /workspace)"
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Execution timeout in seconds (default: 30)",
+        "minimum": 1,
+        "maximum": 300
+      },
+      "stdin": {
+        "type": "string",
+        "description": "Standard input to provide to the program"
+      }
+    },
+    "required": ["sandbox_id", "code"],
+    "additionalProperties": false
+  }
+}
